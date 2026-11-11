@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#08090d">
+  <title>NADII — Cat Dungeon Survivors</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+    <canvas id="game" aria-label="Area permainan Nadii"></canvas>
+    <section id="hud" class="hidden">
+      <div class="hud-top">
+        <div class="hud-card"><small>PHASE</small><b id="phase">1</b></div>
+        <div class="hud-card"><small>LEVEL</small><b id="level">1</b></div>
+        <div class="hud-card"><small>ELIMINATED</small><b id="kills">0</b></div>
+        <div class="hud-card"><small>TIME</small><b id="timer">00:00</b></div>
+      </div>
+      <div class="status-bars">
+        <div class="bar-line"><span>HP</span><div class="bar"><i id="hpbar"></i></div><b id="hptext">100/100</b></div>
+        <div class="bar-line"><span>EXP</span><div class="bar exp"><i id="expbar"></i></div><b id="exptext">0/10</b></div>
+      </div>
+      <div class="weapon-chip" id="weapon-chip">SWORD · AUTO</div>
+      <button id="pause-btn" class="mini-btn" aria-label="Pause">Ⅱ</button>
+      <div id="boss-ui" class="boss-ui hidden"><span id="boss-name">DUNGEON BEAST</span><div class="bar bossbar"><i id="bossbar"></i></div></div>
+    </section>
+
+    <section id="menu" class="screen">
+      <div class="panel title-panel">
+        <div class="eyebrow">A 2-BIT SURVIVAL ADVENTURE</div>
+        <h1>NAD<span>II</span></h1>
+        <p class="subtitle">CAT DUNGEON SURVIVORS</p>
+        <div class="cat-preview" id="preview-cat">◢</div>
+        <p class="intro">Satu kucing. Dungeon tanpa ujung. Bertahan selama mungkin.</p>
+        <button id="start-btn" class="primary">MULAI BERTUALANG <span>→</span></button>
+        <button id="customize-btn" class="secondary">KUSTOMISASI KUCING</button>
+        <div class="menu-foot">WASD / ARROW KEYS · AUTO ATTACK</div>
+      </div>
+    </section>
+
+    <section id="custom-screen" class="screen hidden">
+      <div class="panel customize-panel">
+        <div class="panel-head"><div><div class="eyebrow">MAKE IT YOURS</div><h2>CAT CUSTOMIZER</h2></div><button class="close-btn" id="close-custom">×</button></div>
+        <div class="custom-layout">
+          <div class="preview-box"><canvas id="preview-canvas" width="160" height="160"></canvas><strong id="cat-name">YOUR CAT</strong><small>LIVE PREVIEW</small></div>
+          <div class="custom-options">
+            <label>FUR COLOR</label><div class="swatches" id="fur-options"></div>
+            <label>OUTFIT</label><div class="swatches" id="cloth-options"></div>
+            <label>HAT</label><div class="choice-row" id="hat-options"></div>
+            <label>TAIL</label><div class="choice-row" id="tail-options"></div>
+            <label>WEAPON</label><div class="weapon-options" id="weapon-options"></div>
+          </div>
+        </div>
+        <button id="save-custom" class="primary">SIMPAN TAMPILAN</button>
+      </div>
+    </section>
+
+    <section id="level-screen" class="screen hidden">
+      <div class="panel upgrade-panel"><div class="eyebrow">LEVEL UP!</div><h2>CHOOSE YOUR POWER</h2><p>Pilih satu kemampuan untuk memperkuat kucingmu.</p><div id="upgrade-list" class="upgrade-list"></div></div>
+    </section>
+
+    <section id="pause-screen" class="screen hidden">
+      <div class="panel small-panel"><div class="eyebrow">TAKE A BREATH</div><h2>PAUSED</h2><button id="resume-btn" class="primary">LANJUTKAN</button><button id="quit-btn" class="secondary">KEMBALI KE MENU</button></div>
+    </section>
+
+    <section id="gameover-screen" class="screen hidden">
+      <div class="panel small-panel"><div class="eyebrow">RUN COMPLETE</div><h2>GAME OVER</h2><div class="result-grid"><div><small>PHASE</small><b id="result-phase">1</b></div><div><small>LEVEL</small><b id="result-level">1</b></div><div><small>KILLS</small><b id="result-kills">0</b></div></div><button id="again-btn" class="primary">COBA LAGI</button><button id="home-btn" class="secondary">MENU UTAMA</button></div>
+    </section>
+    <div id="mobile-controls" class="hidden"><div class="dpad"><button data-dir="up">▲</button><div><button data-dir="left">◀</button><button data-dir="down">▼</button><button data-dir="right">▶</button></div></div></div>
+    <div id="toast" class="toast hidden"></div>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
