@@ -11,46 +11,42 @@ const defaults={name:"THE WANDERER",class:"wanderer",skin:"#d6a078",hair:"short"
 let profile={...defaults,...saved};
 
 
-// Sprite sheets are supplied by the user. Copy the selected PNGs into assets/
-// using the folder/file names listed in README.md. Each frame is 96x96.
-const SPRITE_BASE = "assets/";
-const spriteSheets = {};
-const spriteFrameCounts = {
-  player: { idle:6, walk:8, attack1:8, attack2:8, hurt:4, death:10, block:6 },
-  slime:  { idle:6, walk:8, attack1:8, attack2:8, hurt:4, death:10 }
-};
-function loadSprite(key, path, frames) {
+// 0x72 Dungeon Tileset: individual 16x16 pixel-art sprites.
+const ASSET_BASE = "assets/";
+const art = {};
+function loadArt(key, path) {
   const img = new Image();
-  img.src = SPRITE_BASE + path;
-  spriteSheets[key] = { img, frames, ready:false };
-  img.onload = () => { spriteSheets[key].ready=true; if(typeof renderPreviews==="function") renderPreviews(); };
-  img.onerror = () => console.warn("Sprite belum ditemukan:", img.src);
+  img.src = ASSET_BASE + path;
+  art[key] = { img, ready:false };
+  img.onload = () => { art[key].ready=true; if(typeof renderPreviews==="function") renderPreviews(); };
+  img.onerror = () => console.warn("Asset belum ditemukan:", img.src);
 }
 [
- ["player_idle","player/idle.png",6],["player_walk","player/walk.png",8],
- ["player_attack1","player/attack1.png",8],["player_attack2","player/attack2.png",8],
- ["player_hurt","player/hurt.png",4],["player_death","player/death.png",10],
- ["player_block","player/block.png",6],
- ["slime_idle","enemies/slime_idle.png",6],["slime_walk","enemies/slime_walk.png",8],
- ["slime_attack1","enemies/slime_attack1.png",8],["slime_hurt","enemies/slime_hurt.png",4],
- ["slime_death","enemies/slime_death.png",10]
-].forEach(([key,path,frames])=>loadSprite(key,path,frames));
-function drawSheetFrame(ctx, key, frame, x, y, size, flip=false) {
-  const sheet=spriteSheets[key];
-  if(!sheet || !sheet.ready) return false;
-  const f=((Math.floor(frame)%sheet.frames)+sheet.frames)%sheet.frames;
+ ["knight","characters/knight_blue.png"],
+ ["knight2","characters/knight_yellow.png"],
+ ["paladin","characters/paladin.png"],
+ ["goblin","enemies/goblin.png"],["orc","enemies/orc.png"],
+ ["skeleton","enemies/skeleton.png"],["zombie","enemies/zombie.png"],
+ ["bat","enemies/bat.png"],["imp","enemies/imp.png"],
+ ["demon","enemies/demon.png"],["fire","enemies/fire_elemental.png"],
+ ["floor","environment/floor.png"],["floorMud","environment/floor_mud.png"],
+ ["floorLight","environment/floor_light.png"],
+ ["sword","items/sword_steel.png"],["potion","items/potion_red.png"],
+ ["chest","items/chest.png"]
+].forEach(([key,path])=>loadArt(key,path));
+function drawArt(ctx,key,x,y,w,h,flip=false) {
+  const a=art[key]; if(!a || !a.ready) return false;
   ctx.save();
-  if(flip){ctx.translate(x+size,y);ctx.scale(-1,1);ctx.drawImage(sheet.img,f*96,0,96,96,0,0,size,size);}
-  else ctx.drawImage(sheet.img,f*96,0,96,96,x,y,size,size);
-  ctx.restore();
-  return true;
+  if(flip){ctx.translate(x+w,y);ctx.scale(-1,1);ctx.drawImage(a.img,0,0,w,h);}
+  else ctx.drawImage(a.img,x,y,w,h);
+  ctx.restore(); return true;
 }
 function drawPreviewSprite(ctx,w,h) {
   ctx.clearRect(0,0,w,h);
-  const size=Math.min(w*.76,h*.76), x=(w-size)/2, y=(h-size)/2+10;
-  if(!drawSheetFrame(ctx,"player_idle",2,x,y,size,false)) drawHero(ctx,w,h,profile,2.15);
+  const key=profile.class==="knight"?"knight":profile.class==="mage"?"paladin":"knight";
+  const size=Math.min(w*.58,h*.64);
+  if(!drawArt(ctx,key,(w-size)/2,(h-size)/2+8,size,size*1.25)) drawHero(ctx,w,h,profile,2.15);
 }
-
 const skins=["#f1c7a1","#d6a078","#a96e4d","#704632","#e6b7a0"];
 const hairs=["#211c28","#70412c","#c18b43","#d8d8df","#8b354e","#435c82"];
 const armorColors=["#596d78","#a83f4c","#3d527e","#4b775e","#9b7842","#5c536f"];
@@ -116,7 +112,7 @@ function startGame(){
   $("hud-name").textContent=profile.name.toUpperCase();$("hud-class").textContent=profile.class.toUpperCase();last=performance.now();raf=requestAnimationFrame(loop);
 }
 function spawnEnemy(){const r=currentRun,edge=Math.floor(rand(0,4));let x,y;if(edge===0){x=rand(0,r.w);y=-30}else if(edge===1){x=r.w+30;y=rand(0,r.h)}else if(edge===2){x=rand(0,r.w);y=r.h+30}else{x=-30;y=rand(0,r.h)}
- const tough= Math.random()<Math.min(.25,r.time/180);r.enemies.push({x,y,r:tough?19:13,hp:tough?42:22,max:tough?42:22,speed:tough?34:50,damage:tough?14:8,xp:tough?12:7,tough,flash:0,animTime:0,anim:"idle",facing:1,dead:false})}
+ const tough= Math.random()<Math.min(.25,r.time/180);r.enemies.push({x,y,r:tough?19:13,hp:tough?42:22,max:tough?42:22,speed:tough?34:50,damage:tough?14:8,xp:tough?12:7,tough,flash:0,animTime:0,anim:"idle",facing:1,dead:false,sprite:["goblin","skeleton","zombie","bat","imp","orc"][Math.floor(Math.random()*6)]})}
 function nearest(){const r=currentRun,p=r.player;let best=null,bd=Infinity;for(const e of r.enemies){const d=dist(p,e);if(d<bd){bd=d;best=e}}return best}
 function fire(manual=false){const r=currentRun;if(!r||r.paused||$("levelup-modal").classList.contains("hidden")===false)return;const target=nearest();if(!target)return;
  const dx=target.x-r.player.x,dy=target.y-r.player.y,len=Math.hypot(dx,dy)||1;const spread=manual?0:rand(-.035,.035);
@@ -151,18 +147,30 @@ function update(dt){
  if(r.xp>=r.xpNeed)levelUp();
 }
 function render(){
- const r=currentRun;if(!r)return;const w=innerWidth,h=innerHeight;ctx.clearRect(0,0,w,h);ctx.fillStyle="#0a1018";ctx.fillRect(0,0,w,h);
- const grid=48;ctx.strokeStyle="#1b2933";ctx.lineWidth=1;for(let x=0;x<w;x+=grid){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=grid){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+ const r=currentRun;if(!r)return;const w=innerWidth,h=innerHeight;ctx.clearRect(0,0,w,h);
+ // Repeat the 16x16 dungeon floor texture across the arena.
+ const floor=art.floor;
+ if(floor && floor.ready){
+   for(let y=0;y<h;y+=32) for(let x=0;x<w;x+=32) ctx.drawImage(floor.img,x,y,32,32);
+ } else {ctx.fillStyle="#211e25";ctx.fillRect(0,0,w,h)}
+ // Subtle dark vignette and arena rings.
+ const shade=ctx.createRadialGradient(w/2,h/2,80,w/2,h/2,Math.max(w,h)*.7);
+ shade.addColorStop(0,"#00000000");shade.addColorStop(1,"#08070dbb");ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);
  // subtle arena rings
  ctx.strokeStyle="#263847";ctx.beginPath();ctx.arc(r.player.x,r.player.y,150,0,Math.PI*2);ctx.stroke();
- for(const e of r.enemies){const esize=e.tough?68:58;const eframe=Math.floor(e.animTime*(e.anim==="walk"?9:6));const ekey="slime_"+(e.anim==="attack1"?"attack1":e.anim);if(!drawSheetFrame(ctx,ekey,eframe,e.x-esize/2,e.y-esize/2,esize,e.facing<0)){ctx.fillStyle=e.tough?"#9a4e65":"#537d77";ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill()}ctx.fillStyle="#442d3a";ctx.fillRect(e.x-18,e.y-27,36,3);ctx.fillStyle="#e46b73";ctx.fillRect(e.x-18,e.y-27,36*clamp(e.hp/e.max,0,1),3)}
+ for(const e of r.enemies){const esize=e.tough?58:48;ctx.save();if(e.flash>0)ctx.globalAlpha=.55;drawArt(ctx,e.tough?"demon":e.sprite,e.x-esize/2,e.y-esize/2,esize,esize,e.facing<0);ctx.restore();ctx.fillStyle="#24151d";ctx.fillRect(e.x-17,e.y-26,34,4);ctx.fillStyle="#d94c5c";ctx.fillRect(e.x-17,e.y-26,34*clamp(e.hp/e.max,0,1),4)}
  for(const s of r.shots){ctx.fillStyle=s.manual?"#f3df9b":"#9ac7f3";ctx.beginPath();ctx.arc(s.x,s.y,s.manual?5:4,0,Math.PI*2);ctx.fill()}
  for(const q of r.particles){ctx.globalAlpha=clamp(q.life/.4,0,1);ctx.fillStyle=q.color;ctx.fillRect(q.x,q.y,3,3)}ctx.globalAlpha=1;
  ctx.save();if(r.invuln>0)ctx.globalAlpha=.55;
- const ps=r.player, animKey=ps.attackAnim>0?(ps.anim==="attack2"?"player_attack2":"player_attack1"):"player_"+ps.anim;
- const pframe=Math.floor(ps.animTime*(ps.anim==="walk"?10:ps.attackAnim>0?18:5));
- const psize=76;
- if(!drawSheetFrame(ctx,animKey,pframe,ps.x-psize/2,ps.y-psize/2,psize,ps.facing<0))drawHeroAt(ctx,profile);
+ const ps=r.player, psize=58;
+ const charKey=profile.class==="mage"?"paladin":profile.class==="knight"?"knight2":"knight";
+ const bob=ps.anim==="walk"?Math.sin(ps.animTime*12)*3:Math.sin(ps.animTime*3)*1.5;
+ drawArt(ctx,charKey,ps.x-psize/2,ps.y-psize/2+bob,psize,psize*1.25,ps.facing<0);
+ // Steel sword follows the character's facing direction.
+ const swordX=ps.x+(ps.facing>0?13:-29), swordY=ps.y-19+(ps.attackAnim>0?-10:0);
+ drawArt(ctx,"sword",swordX,swordY,16,32,ps.facing<0);
+ // Weapon glint while attacking.
+ if(ps.attackAnim>0){ctx.strokeStyle="#f5d77d";ctx.lineWidth=3;ctx.beginPath();ctx.arc(ps.x+ps.facing*24,ps.y-5,24,-.9,.9);ctx.stroke()}
  ctx.restore();
 }
 function drawHeroAt(c,p){c.fillStyle="#0008";c.beginPath();c.ellipse(0,13,16,6,0,0,Math.PI*2);c.fill();c.fillStyle=p.armorColor;c.fillRect(-11,-8,22,23);c.fillStyle=p.skin;c.beginPath();c.arc(0,-17,10,0,Math.PI*2);c.fill();c.fillStyle=p.hairColor;c.beginPath();c.arc(0,-21,10,Math.PI,Math.PI*2);c.fill();c.fillRect(-10,-22,4,9);c.fillRect(6,-22,4,9);c.fillStyle="#171922";c.fillRect(-4,-18,2,2);c.fillRect(3,-18,2,2);c.strokeStyle=p.weapon==="staff"?"#9b7af1":"#d7dce5";c.lineWidth=3;c.beginPath();c.moveTo(11,0);c.lineTo(20,-20);c.stroke()}
